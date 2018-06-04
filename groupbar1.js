@@ -23,7 +23,7 @@ var color = d3
     "#ff8c00"
   ]);
 
-var xAxis = d3.axisRight().scale(x0);
+var xAxis = d3.axisBottom().scale(x0);
 
 var yAxis = d3
   .axisLeft()
@@ -64,7 +64,7 @@ d3.csv("./data.csv").then(function(data, error) {
   svg
     .append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(" + width + ", 0 " + ")")
+    .attr("transform", "translate(0," + height + ")")
     .style("text-anchor", "start")
     // .attr("transform","rotate(-90)")
     .call(xAxis);
@@ -121,6 +121,9 @@ d3.csv("./data.csv").then(function(data, error) {
       tooltip.style("left", d3.event.pageX + 15 + "px");
       tooltip.style("top", d3.event.pageY - 125 + "px");
       tooltip.style("display", "inline-block");
+      // tooltip.style("background",color(d.name));
+      tooltip.style("border", "2px solid" + color(d.name));
+      tooltip.style("color", color(d.name));
       var x = d3.event.pageX,
         y = d3.event.pageY;
       var elements = document.querySelectorAll(":hover");
@@ -128,10 +131,10 @@ d3.csv("./data.csv").then(function(data, error) {
       l = l - 1;
       elementData = elements[l].__data__;
       tooltip.html(
-        "<b><u><h4>Category: </h4></u></b>" +
+        "<b><u><h3>Category: </h3></u></b>" +
           ageNames[i] +
           "<br>" +
-          "<b><u><h4>Population: </h4></u></b>" +
+          "<b><u><h3>Population: </h3></u></b>" +
           d.value
       );
     });
@@ -140,4 +143,34 @@ d3.csv("./data.csv").then(function(data, error) {
     .select("body")
     .append("div")
     .attr("class", "toolTip");
+
+  var legend = svg
+    .selectAll(".legend")
+    .data(ageNames)
+    .enter()
+    .append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(0," + i * 20 + ")";
+    });
+
+  legend
+    .append("rect")
+    .attr("x", width - 18)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d, i) {
+      console.log("color", color(ageNames));
+      return color(ageNames[i]);
+    });
+
+  legend
+    .append("text")
+    .attr("x", width - 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(function(d) {
+      return d;
+    });
 });
