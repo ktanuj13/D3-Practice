@@ -1,8 +1,8 @@
-var margin = { top: 20, right: 150, bottom: 30, left: 60 };
-svgwidth = 1000;
-svghight = 600;
-width = 1000 - margin.left - margin.right;
-height = 600 - margin.top - margin.bottom;
+var margin = { top: 50, right: 150, bottom: 30, left: 60 };
+svgwidth = 1200;
+svgheight = 600;
+width = svgwidth - margin.left - margin.right;
+height = svgheight - margin.top - margin.bottom;
 
 var x0 = d3
   .scaleBand()
@@ -45,6 +45,14 @@ var svg = d3
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// svg
+//   .append("text")
+//   .attr("y", margin.top + -100) // to make legend out of canvas
+//   // .attr("y", 9)
+//   // .attr("dx", "9em")
+//   .attr("dy", ".9em")
+//   .html("<b>Population</b>");
+
 d3.csv("./data.csv").then(function(data, error) {
   var ageNames = d3.keys(data[0]).filter(function(key) {
     return key !== "State";
@@ -72,7 +80,7 @@ d3.csv("./data.csv").then(function(data, error) {
   // to make x-axis
   svg
     .append("g")
-    .attr("class", "x-axis")
+    .attr("class", "x-axis") // x axis line will hide/show
     .attr("id", "grid") // id for styling grid lines
     .attr("transform", "translate(0," + height + ")")
     .style("text-anchor", "middle")
@@ -82,7 +90,7 @@ d3.csv("./data.csv").then(function(data, error) {
   // to make y-axis
   svg
     .append("g")
-    .attr("class", "y-axis")
+    .attr("class", "y-axis") //// y axis line will hide/show
     .attr("id", "grid") // id for styling grid lines
     .call(yAxis)
     .append("text")
@@ -160,12 +168,13 @@ d3.csv("./data.csv").then(function(data, error) {
     .append("g")
     .attr("class", "legend")
     .attr("transform", function(d, i) {
-      return "translate(0," + i * 20 + ")";
+      return "translate(" + i * 130 + "," + "0)";
     });
 
   legend
     .append("rect")
-    .attr("x", svgwidth - 80) // to make legend out of canvas
+    .attr("x", 30)
+    .attr("y", margin.top + -80) // to make legend out of canvas
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", function(d, i) {
@@ -185,9 +194,10 @@ d3.csv("./data.csv").then(function(data, error) {
 
   legend
     .append("text")
-    .attr("x", svgwidth - 85) // to make legend out of canvas
-    .attr("y", 9)
-    .attr("dy", ".35em")
+    .attr("y", margin.top + -80) // to make legend out of canvas
+    // .attr("y", 9)
+    .attr("dx", "9em")
+    .attr("dy", ".9em")
     .style("text-anchor", "end")
     .text(function(d) {
       return d;
