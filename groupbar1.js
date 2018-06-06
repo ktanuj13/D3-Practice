@@ -7,7 +7,7 @@ height = svgheight - margin.top - margin.bottom;
 var x0 = d3
   .scaleBand()
   .range([0, width])
-  .paddingInner(0.1);
+  .paddingInner(0.1); // changes the length within 2 bars ticks having two label
 //.paddingOuter(0.4);
 
 var x1 = d3.scaleBand().padding(0.05);
