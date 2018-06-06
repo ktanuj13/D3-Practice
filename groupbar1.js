@@ -1,11 +1,14 @@
-var margin = { top: 20, right: 20, bottom: 30, left: 40 },
-  width = 960 - margin.left - margin.right,
-  height = 500 - margin.top - margin.bottom;
+var margin = { top: 20, right: 150, bottom: 30, left: 60 };
+svgwidth = 1000;
+svghight = 600;
+width = 1000 - margin.left - margin.right;
+height = 600 - margin.top - margin.bottom;
 
 var x0 = d3
   .scaleBand()
-  .range([0, width], 0.1)
+  .range([0, width])
   .paddingInner(0.1);
+//.paddingOuter(0.4);
 
 var x1 = d3.scaleBand().padding(0.05);
 
@@ -23,12 +26,16 @@ var color = d3
     "#ff8c00"
   ]);
 
-var xAxis = d3.axisBottom().scale(x0);
+var xAxis = d3
+  .axisBottom()
+  .tickSizeInner(-height) //to make grid lines on x-aixs
+  .scale(x0);
 
 var yAxis = d3
   .axisLeft()
   .scale(y)
-  .tickFormat(d3.format(".2s"));
+  .tickSizeInner(-width) //to make grid lines on y-aixs
+  .tickFormat(d3.format("0.2s"));
 
 var svg = d3
   .select("body")
@@ -39,7 +46,6 @@ var svg = d3
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 d3.csv("./data.csv").then(function(data, error) {
-  // var i=0;
   var ageNames = d3.keys(data[0]).filter(function(key) {
     return key !== "State";
   });
@@ -49,8 +55,10 @@ d3.csv("./data.csv").then(function(data, error) {
       return { name: name, value: +d[name] };
     });
   });
-
+  console.log("data val -- >>", data);
+  //console.log("converted val -- >>", d.ages);
   x0.domain(data.map(d => d.State));
+  console.log(x0("NY"));
   x1.domain(ageNames).rangeRound([0, x0.bandwidth()]);
   y.domain([
     0,
@@ -61,27 +69,31 @@ d3.csv("./data.csv").then(function(data, error) {
     })
   ]);
 
+  // to make x-axis
   svg
     .append("g")
-    .attr("class", "x axis")
+    .attr("class", "x-axis")
+    .attr("id", "grid") // id for styling grid lines
     .attr("transform", "translate(0," + height + ")")
-    .style("text-anchor", "start")
+    .style("text-anchor", "middle")
     // .attr("transform","rotate(-90)")
     .call(xAxis);
 
+  // to make y-axis
   svg
     .append("g")
-    .attr("class", "y axis")
+    .attr("class", "y-axis")
+    .attr("id", "grid") // id for styling grid lines
     .call(yAxis)
     .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("dy", ".71em")
+    // .attr("transform", "rotate(90)")
+    .attr("y", 16)
+    // .attr("dy", ".71em")
     .style("text-anchor", "end")
     .text("Population");
 
-  var state = svg
-    .selectAll(".state")
+  var rect = svg
+    .selectAll(".rectangle")
     .data(data)
     .enter()
     .append("g")
@@ -90,13 +102,14 @@ d3.csv("./data.csv").then(function(data, error) {
       return "translate(" + x0(d.State) + ",0)";
     });
 
-  state
+  rect
     .selectAll("rect")
-    .data(function(d) {
+    .data(function(d, i) {
       return d.ages;
     })
     .enter()
     .append("rect")
+    .attr("id", "bars")
     .attr("width", x1.bandwidth())
     .attr("x", function(d) {
       return x1(d.name);
@@ -126,10 +139,6 @@ d3.csv("./data.csv").then(function(data, error) {
       tooltip.style("color", color(d.name));
       var x = d3.event.pageX,
         y = d3.event.pageY;
-      var elements = document.querySelectorAll(":hover");
-      l = elements.length;
-      l = l - 1;
-      elementData = elements[l].__data__;
       tooltip.html(
         "<b><u><h3>Category: </h3></u></b>" +
           ageNames[i] +
@@ -156,17 +165,27 @@ d3.csv("./data.csv").then(function(data, error) {
 
   legend
     .append("rect")
-    .attr("x", width - 18)
+    .attr("x", svgwidth - 80) // to make legend out of canvas
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", function(d, i) {
       console.log("color", color(ageNames));
       return color(ageNames[i]);
+    })
+    .on("click", function(d) {
+      // Determine if current line is visible
+      var active = bars.active ? false : true,
+        newOpacity = active ? 0 : 1;
+      // Hide or show the elements
+      d3.select("#bars").style("opacity", newOpacity);
+      // d3.select("#blueAxis").style("opacity", newOpacity);
+      // Update whether or not the elements are active
+      bars.active = active;
     });
 
   legend
     .append("text")
-    .attr("x", width - 24)
+    .attr("x", svgwidth - 85) // to make legend out of canvas
     .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "end")
